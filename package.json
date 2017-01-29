@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
-    "ical": "^0.5.0"
+    "ical": "^0.5.0",
+    "ical-toolkit": "^1.0.9"
   },
   "devDependencies": {},
   "scripts": {
