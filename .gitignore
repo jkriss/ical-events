@@ -1,4 +1,5 @@
 node_modules
 *.ics
 merged-calendar.*
+calendar.*
 geocoder.db

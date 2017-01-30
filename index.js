@@ -1,6 +1,5 @@
 const ical = require('ical')
 const RRule = require('rrule').RRule
-const fs = require('fs')
 const icalToolkit = require('ical-toolkit')
 const builder = icalToolkit.createIcsFileBuilder()
 const geocoder = require('cached-geocoder')()
@@ -95,15 +94,4 @@ const mergeCalendars = function(urls, cb) {
 
 }
 
-const icals = [
-  'https://calendar.google.com/calendar/ical/afhvm1spb2ap2ldc513p7culpg%40group.calendar.google.com/private-394f049e611065f2f9ed1fe2e9a136e7/basic.ics',
-  'https://calendar.google.com/calendar/ical/l7jsc4l2uo5j9il5u7pq9frt7k%40group.calendar.google.com/private-7256f3d1addc06a8ff32ee68eece20f5/basic.ics',
-  'https://calendar.google.com/calendar/ical/resistanceupdates%40gmail.com/public/basic.ics'
-]
-
-mergeCalendars(icals, function(err, result) {
-  // console.log(result.json)
-  // console.log(result.ical)
-  fs.writeFileSync('merged-calendar.ics', result.ical)
-  fs.writeFileSync('merged-calendar.json', JSON.stringify(result.json, null, 2))
-})
+module.exports = mergeCalendars
