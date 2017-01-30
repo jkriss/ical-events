@@ -4,8 +4,13 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "async": "^2.1.4",
+    "aws-sdk": "^2.9.0",
+    "cached-geocoder": "^1.0.0",
+    "geocoder": "^0.2.2",
     "ical": "^0.5.0",
-    "ical-toolkit": "^1.0.9"
+    "ical-toolkit": "^1.0.9",
+    "latlon-geohash": "^1.1.0"
   },
   "devDependencies": {},
   "scripts": {

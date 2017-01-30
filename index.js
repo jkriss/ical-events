@@ -3,16 +3,20 @@ const RRule = require('rrule').RRule
 const fs = require('fs')
 const icalToolkit = require('ical-toolkit')
 const builder = icalToolkit.createIcsFileBuilder()
+const geocoder = require('cached-geocoder')()
+const geohash = require('latlon-geohash')
+const async = require('async')
 
 const now = new Date()
 const nextYearish = new Date(now.getTime() + (1000 * 60 * 60 * 24 * 367))
 
-const format = function(entry) {
+const format = function(entry, cb) {
   const evt = {}
   evt.summary = entry.summary
   if (entry.description && entry.description.trim() !== '') evt.description = entry.description
   evt.start = entry.start
   evt.end = entry.end
+
   // console.log(entry.summary)
   // console.log(entry.location, entry.start, 'to', entry.end)
   if (entry.rrule) {
@@ -23,7 +27,21 @@ const format = function(entry) {
     // console.log(evt.repeats)
     // console.log("upcoming:", evt.upcoming)
   }
-  return evt
+  if (entry.location) {
+    evt.location = entry.location
+    geocoder.geocode(evt.location, function(err, results) {
+      if (err) return cb(err)
+      const result = results.results[0]
+      if (result) {
+        evt.geolocation = result
+        evt.geohash = geohash.encode(result.geometry.location.lat, result.geometry.location.lng)
+      }
+      cb(null, evt)
+    })
+  } else {
+    cb(null, evt)
+  }
+
 }
 
 const makeICal = function(events) {
@@ -66,10 +84,11 @@ const mergeCalendars = function(urls, cb) {
       if (count === 0) {
         // sort by start date
         events = events.sort(function(a,b) { return a.next - b.next })
-        const jsonEvents = events.map(format)
-        // console.log(JSON.stringify(jsonEvents, null, 2))
-        const ical = makeICal(events)
-        cb(null, { json: jsonEvents, ical: ical })
+         async.map(events, format, function(err, jsonEvents) {
+          // console.log(JSON.stringify(jsonEvents, null, 2))
+          const ical = makeICal(events)
+          cb(null, { json: jsonEvents, ical: ical })
+        })
       }
     })
   })
@@ -78,7 +97,8 @@ const mergeCalendars = function(urls, cb) {
 
 const icals = [
   'https://calendar.google.com/calendar/ical/afhvm1spb2ap2ldc513p7culpg%40group.calendar.google.com/private-394f049e611065f2f9ed1fe2e9a136e7/basic.ics',
-  'https://calendar.google.com/calendar/ical/l7jsc4l2uo5j9il5u7pq9frt7k%40group.calendar.google.com/private-7256f3d1addc06a8ff32ee68eece20f5/basic.ics'
+  'https://calendar.google.com/calendar/ical/l7jsc4l2uo5j9il5u7pq9frt7k%40group.calendar.google.com/private-7256f3d1addc06a8ff32ee68eece20f5/basic.ics',
+  'https://calendar.google.com/calendar/ical/resistanceupdates%40gmail.com/public/basic.ics'
 ]
 
 mergeCalendars(icals, function(err, result) {
